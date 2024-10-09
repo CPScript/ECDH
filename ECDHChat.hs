@@ -1,5 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+-- | A = user 1
+-- | B = user 2
+
 module ECDHChat where
 
 import Crypto.Error (CryptoFailable)
