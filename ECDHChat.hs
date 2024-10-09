@@ -81,20 +81,20 @@ decrypt key ciphertext =
 
 handleConnection :: Socket -> String -> IO () -- | Handle incoming connections
 handleConnection sock username = do
-  (user-1PrivateKey, user-1PublicKey) <- generateKeyPair'
-  let user-1PublicKeyBytes = serializePoint user-1PublicKey
-  send sock user-1PublicKeyBytes
-  user-2PublicKeyBytes <- recv sock 1024
-  let user-2PublicKey = deserializePoint user-2PublicKeyBytes
-  let user-1SharedSecret = ecdh user-2PublicKey user-1PrivateKey
-  let user-1SymmetricKey = deriveKey user-1SharedSecret
+  (APrivateKey, APublicKey) <- generateKeyPair'
+  let APublicKeyBytes = serializePoint APublicKey
+  send sock APublicKeyBytes
+  BPublicKeyBytes <- recv sock 1024
+  let BPublicKey = deserializePoint BPublicKeyBytes
+  let ASharedSecret = ecdh BPublicKey APrivateKey
+  let ASymmetricKey = deriveKey ASharedSecret
   putStrLn $ "Connected to " ++ username ++ ". Enter a message to send:"
   message <- getLine
-  let encryptedMessage = encrypt user-1SymmetricKey (fromString message)
+  let encryptedMessage = encrypt ASymmetricKey (fromString message)
   send sock encryptedMessage
   putStrLn "Waiting for response..."
-  user-2EncryptedMessage <- recv sock 1024
-  let decryptedMessage = decrypt user-1SymmetricKey user-2EncryptedMessage
+  BEncryptedMessage <- recv sock 1024
+  let decryptedMessage = decrypt ASymmetricKey BEncryptedMessage
   putStrLn $ username ++ ": " ++ show decryptedMessage 
 
 -- | Start the server
@@ -122,20 +122,20 @@ startClient = do
   sock <- socket AF_INET Stream 0
   connect sock (SockAddrInet 8080 iNADDR_ANY)
   putStrLn "Connected to server. Waiting for public key..."
-  user-1PublicKeyBytes <- recv sock 1024
-  let user-1PublicKey = deserializePoint user-1PublicKeyBytes
-  (user-2PrivateKey, user-2PublicKey) <- generateKeyPair'
-  let user-2PublicKeyBytes = serializePoint user-2PublicKey
-  send sock user-2PublicKeyBytes
-  user-1SharedSecret <- ecdh user-1PublicKey user-2PrivateKey
-  let user-2SymmetricKey = deriveKey user-1SharedSecret
+  APublicKeyBytes <- recv sock 1024
+  let APublicKey = deserializePoint APublicKeyBytes
+  (BPrivateKey, BPublicKey) <- generateKeyPair'
+  let BPublicKeyBytes = serializePoint BPublicKey
+  send sock BPublicKeyBytes
+  ASharedSecret <- ecdh APublicKey BPrivateKey
+  let BSymmetricKey = deriveKey ASharedSecret
   putStrLn $ "Connected to " ++ serverUsername ++ ". Enter a message to send:"
   message <- getLine
-  let encryptedMessage = encrypt user-2SymmetricKey (fromString message)
+  let encryptedMessage = encrypt BSymmetricKey (fromString message)
   send sock encryptedMessage
   putStrLn "Waiting for response..."
-  user-1EncryptedMessage <- recv sock 1024
-  let decryptedMessage = decrypt user-2SymmetricKey user-1EncryptedMessage
+  AEncryptedMessage <- recv sock 1024
+  let decryptedMessage = decrypt BSymmetricKey AEncryptedMessage
   putStrLn $ serverUsername ++ ": " ++ show decryptedMessage
 
 main :: IO ()
