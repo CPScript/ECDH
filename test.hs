@@ -140,7 +140,7 @@ startClient serverIP = withSocketsDo $ do
 
 main :: IO ()
 main = do
-  putStrLn "Do you want to start as a server or client?"
+  putStrLn "Do you want to start a server or a client?"
   response <- getLine
   case response of
     "server" -> startServer
