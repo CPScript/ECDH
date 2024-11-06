@@ -1,16 +1,14 @@
 -- Security Additions
 
 -- 1. now uses a nonce (unique per message ideally) for each encryption to prevent replay attacks. In a real setup, dynamically generate a random nonce each time.
-
 -- 2. Errors are now caught and displayed in handleClient for more robust error reporting.
-
-__ 3. Each session has a limited duration to prevent unauthorized reuse. After 1 hour, the connection expires. (this can be changed on the client's side)
-
+-- 3. Each session has a limited duration to prevent unauthorized reuse. After 1 hour, the connection expires. (this can be changed on the client's side)
 -- 4. Use of forkIO in startServer for handling multiple clients concurrently; rate limiting logic can be added.
 
+-- ------------ --
 {-# LANGUAGE OverloadedStrings #-}
 
-module ECDHChat where
+module ECDH where
 
 import Control.Concurrent (forkIO)
 import Control.Exception (bracket)
@@ -114,7 +112,7 @@ startServer = withSocketsDo $ do
               let sharedSecret = ecdh clientPublicKey privateKey
               case sharedSecret of
                 Just secret -> handleClient conn (deriveKey secret)
-                Nothing -> putStrLn "Error in ECDH key exchange."
+                Nothing -> putStrLn "Error in Ecliptic curve key exchange."
             Nothing -> putStrLn "Invalid client public key received."
         acceptLoop
 
