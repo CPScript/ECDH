@@ -8,7 +8,7 @@
 -- ------------ --
 {-# LANGUAGE OverloadedStrings #-}
 
-module ECDH where
+module ECDHChat where
 
 import Control.Concurrent (forkIO)
 import Control.Exception (bracket)
